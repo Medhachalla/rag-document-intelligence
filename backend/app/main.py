@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.api import router
+from app.api.documents import router as document_router
+from app.api.query import router as query_router
 from app.core.config import get_settings
 from app.db import init_db
+from app.core.config import get_settings
 
 
 def create_app() -> FastAPI:
@@ -22,7 +23,17 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.include_router(router, prefix=settings.api_prefix)
+    settings = get_settings()
+
+    app.include_router(
+        document_router,
+        prefix=settings.api_prefix
+    )
+
+    app.include_router(
+        query_router,
+        prefix=settings.api_prefix
+    )
     return app
 
 

@@ -10,7 +10,7 @@ __pycache__/
 *.pyc
 
 # RAG generated runtime data
-backend/backend/data/
+backend/data/
 
 # Database
 *.db
