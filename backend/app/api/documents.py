@@ -1,22 +1,22 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, File, UploadFile, status
 
 from app.core.config import get_settings
-from app.repositories import create_document, get_chunks_by_ids, get_document, list_documents
-from app.schemas import  DocumentResponse, UploadResponse
-from app.services.embeddings import embed_query
+from app.core.logging import get_logger
+from app.core.exceptions import (
+    DocumentNotFoundError,
+    EmptyFileError,
+    FileTooLargeError,
+    InvalidFileTypeError,
+)
+from app.repositories import create_document, get_document, list_documents
+from app.schemas import DocumentResponse, UploadResponse
 from app.services.ingestion import process_document
-from app.services.ollama import generate_answer
 
-
+logger = get_logger(__name__)
 router = APIRouter()
-
-
-@router.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
 
 
 @router.post(
@@ -37,30 +37,27 @@ async def upload_document(
         "application/octet-stream",
     }
     if not (is_pdf_name and is_pdf_type):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PDF uploads are supported.",
-        )
+        raise InvalidFileTypeError()
 
     document_id = str(uuid4())
     stored_path = settings.upload_dir / f"{document_id}.pdf"
 
     contents = await file.read()
     if not contents:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Uploaded PDF is empty.",
-        )
+        raise EmptyFileError()
     max_bytes = settings.max_upload_mb * 1024 * 1024
     if len(contents) > max_bytes:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"PDF exceeds the {settings.max_upload_mb} MB upload limit.",
-        )
+        raise FileTooLargeError(settings.max_upload_mb)
     stored_path.write_bytes(contents)
 
     document = create_document(document_id, original_name, str(stored_path))
     background_tasks.add_task(process_document, document_id, stored_path)
+    logger.info(
+        "Document upload accepted document_id=%s filename=%s size_bytes=%d",
+        document_id,
+        original_name,
+        len(contents),
+    )
 
     return UploadResponse(
         id=document["id"],
@@ -79,5 +76,5 @@ def documents() -> list[DocumentResponse]:
 def document_detail(document_id: str) -> DocumentResponse:
     document = get_document(document_id)
     if not document:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        raise DocumentNotFoundError()
     return DocumentResponse(**document)

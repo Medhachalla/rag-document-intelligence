@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field
 
 
+class ErrorResponse(BaseModel):
+    error: str
+    message: str
+    citations: list["Citation"] | None = None
+
+
 class DocumentResponse(BaseModel):
     id: str
     filename: str

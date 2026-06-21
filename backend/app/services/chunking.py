@@ -11,9 +11,12 @@ def chunk_pages(
     pages: list[dict[str, int | str]],
     chunk_size: int,
     chunk_overlap: int,
+    min_chunk_chars: int,
 ) -> list[TextChunk]:
     if chunk_overlap >= chunk_size:
         raise ValueError("chunk_overlap must be smaller than chunk_size")
+    if min_chunk_chars < 1:
+        raise ValueError("min_chunk_chars must be greater than zero")
 
     chunks: list[TextChunk] = []
     for page in pages:
@@ -24,7 +27,7 @@ def chunk_pages(
         while start < len(text):
             end = min(start + chunk_size, len(text))
             chunk_text = text[start:end].strip()
-            if chunk_text:
+            if len(chunk_text) >= min_chunk_chars:
                 chunks.append(TextChunk(text=chunk_text, page_number=page_number))
             if end == len(text):
                 break
