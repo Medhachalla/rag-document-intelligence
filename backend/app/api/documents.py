@@ -16,13 +16,36 @@ from app.schemas import DocumentResponse, UploadResponse
 from app.services.ingestion import process_document
 
 logger = get_logger(__name__)
-router = APIRouter()
-
+router = APIRouter(
+    tags=["Documents"]
+)
 
 @router.post(
     "/documents/upload",
     response_model=UploadResponse,
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=202,
+    summary="Upload a PDF document for processing",
+    description="""
+    Uploads a PDF document and starts the document ingestion pipeline.
+
+    The uploaded document is:
+    - Validated for file type and size
+    - Stored with a unique document identifier
+    - Processed asynchronously in the background
+    - Extracted into text chunks
+    - Embedded and stored in the vector database
+
+    Returns the document processing status after upload.
+    """,
+    responses={
+        400: {
+            "description": "Invalid file type or invalid request"
+        },
+        413: {
+            "description": "Uploaded file exceeds size limit"
+        }
+    },
+    tags=["Documents"]
 )
 async def upload_document(
     background_tasks: BackgroundTasks,
@@ -67,12 +90,49 @@ async def upload_document(
     )
 
 
-@router.get("/documents", response_model=list[DocumentResponse])
+@router.get(
+    "/documents",
+    response_model=list[DocumentResponse],
+    summary="List uploaded documents",
+    description="""
+    Retrieves all uploaded documents stored in the system.
+
+    Returns document information including:
+    - Document ID
+    - Filename
+    - Processing status
+    - Processing errors if ingestion failed
+
+    Used to monitor uploaded document lifecycle.
+    """,
+    tags=["Documents"]
+)
 def documents() -> list[DocumentResponse]:
     return [DocumentResponse(**document) for document in list_documents()]
 
 
-@router.get("/documents/{document_id}", response_model=DocumentResponse)
+@router.get(
+    "/documents/{document_id}",
+    response_model=DocumentResponse,
+    summary="Retrieve document details",
+    description="""
+    Retrieves details for a specific uploaded document using its document ID.
+
+    Returns:
+    - Document metadata
+    - Current processing status
+    - Processing error information if available
+
+    Returns a 404 error if the document does not exist.
+    """,
+    responses={
+        404: {
+            "description": "Document not found"
+        }
+    },
+    
+    tags=["Documents"]
+)
 def document_detail(document_id: str) -> DocumentResponse:
     document = get_document(document_id)
     if not document:

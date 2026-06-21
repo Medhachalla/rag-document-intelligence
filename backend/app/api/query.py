@@ -10,10 +10,41 @@ from app.services.ollama import format_source_context, generate_answer
 from app.services.vector_store import vector_store
 
 logger = get_logger(__name__)
-router = APIRouter()
+router = APIRouter(
+    tags=["Query"]
+)
 
 
-@router.post("/query", response_model=QueryResponse)
+@router.post(
+    "/query",
+    response_model=QueryResponse,
+    summary="Query documents using RAG",
+    description="""
+    Answers questions using the uploaded document knowledge base.
+
+    The RAG pipeline performs:
+    - Query embedding generation
+    - Semantic similarity search
+    - Relevant context retrieval
+    - AI response generation using the configured language model
+
+    Returns:
+    - Generated answer
+    - Source citations
+    - Relevant document references
+
+    The response is grounded using retrieved document chunks.
+    """,
+    responses={
+        400: {
+            "description": "Invalid file type or invalid request"
+        },
+        413: {
+            "description": "Uploaded file exceeds size limit"
+        }
+    },
+    tags=["Query"]
+)
 async def query_documents(payload: QueryRequest) -> QueryResponse:
     settings = get_settings()
     top_k = payload.top_k or settings.retrieval_k

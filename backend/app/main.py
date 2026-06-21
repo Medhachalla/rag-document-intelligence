@@ -34,9 +34,14 @@ def create_app() -> FastAPI:
     init_db()
 
     app = FastAPI(
-        title=settings.app_name,
-        version="0.1.0",
-        description="Enterprise-style RAG document search API.",
+        title="DocSense AI API",
+        description="""
+        AI-powered document intelligence platform using Retrieval Augmented Generation (RAG).
+
+        Users can upload documents, index their contents,
+        and query documents using semantic search and LLM-based generation.
+        """,
+        version="1.0.0"
     )
     app.add_middleware(
         CORSMiddleware,
