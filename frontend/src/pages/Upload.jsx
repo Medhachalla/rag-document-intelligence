@@ -28,7 +28,7 @@ function Upload(){
             setSuccessMessage("");
 
             const response = await api.post(
-                "/api/v1/documents/upload",
+                "/v1/documents/upload",
                 formData
             );
 

@@ -1,0 +1,17 @@
+
+venv/
+__pycache__/
+*.pyc
+.env
+.git
+
+# Runtime data
+data/
+uploads/
+chroma/
+.chromadb
+*.db
+
+# Testing/cache
+.pytest_cache/
+.coverage

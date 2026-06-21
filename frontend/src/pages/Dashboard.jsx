@@ -32,7 +32,7 @@ function Dashboard(){
                 setIsLoading(true);
                 setError("");
 
-                const response = await api.get("/api/v1/documents");
+                const response = await api.get("/v1/documents");
 
                 if (isMounted) {
                     setDocuments(response.data);

@@ -27,7 +27,7 @@ function Chat(){
             setAnswer("");
             setCitations([]);
 
-            const response = await api.post("/api/v1/query", {
+            const response = await api.post("/v1/query", {
                 question: trimmedQuestion,
                 top_k: 3,
             });
