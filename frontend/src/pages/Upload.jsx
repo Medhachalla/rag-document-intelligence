@@ -7,6 +7,7 @@ import getApiErrorMessage from "../api/errors";
 function Upload(){
     const [file, setFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [error, setError] = useState("");
 
@@ -47,36 +48,75 @@ function Upload(){
         setError("");
     }
 
+    function handleDragOver(event) {
+        event.preventDefault();
+        setIsDragging(true);
+    }
+
+    function handleDragLeave() {
+        setIsDragging(false);
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        setIsDragging(false);
+        setSuccessMessage("");
+        setError("");
+
+        const droppedFile = event.dataTransfer.files[0];
+        if (droppedFile) {
+            setFile(droppedFile);
+        }
+    }
+
     return (
-        <div>
+        <div className="page-stack narrow-page">
             <header className="page-header">
                 <div>
                     <h1>
-                        Upload Document
+                        Upload document
                     </h1>
 
                     <p>
-                        Add PDFs to the searchable DocSense knowledge base.
+                        Add a PDF to the searchable knowledge base. Processing starts immediately after upload.
                     </p>
                 </div>
             </header>
 
             <form className="upload-panel" onSubmit={upload}>
-                <label htmlFor="document-upload">
-                    PDF file
+                <label
+                    className={`upload-dropzone ${isDragging ? "is-dragging" : ""}`}
+                    htmlFor="document-upload"
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                >
+                    <span className="dropzone-title">
+                        Drop a PDF here, or browse
+                    </span>
+
+                    <span className="dropzone-description">
+                        PDF files only. The backend will extract, chunk, embed, and index the document.
+                    </span>
+
+                    <input
+                        id="document-upload"
+                        type="file"
+                        accept=".pdf,application/pdf"
+                        onChange={handleFileChange}
+                    />
                 </label>
 
-                <input
-                    id="document-upload"
-                    type="file"
-                    accept=".pdf,application/pdf"
-                    onChange={handleFileChange}
-                />
-
                 {file && (
-                    <p className="selected-file">
-                        Selected: {file.name}
-                    </p>
+                    <div className="selected-file">
+                        <span>
+                            Selected file
+                        </span>
+
+                        <strong>
+                            {file.name}
+                        </strong>
+                    </div>
                 )}
 
                 <button type="submit" disabled={isUploading}>

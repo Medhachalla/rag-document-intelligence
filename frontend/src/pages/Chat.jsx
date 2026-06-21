@@ -43,11 +43,11 @@ function Chat(){
     }
 
     return (
-        <div>
+        <div className="page-stack chat-page">
             <header className="page-header">
                 <div>
                     <h1>
-                        Chat
+                        Ask DocSense
                     </h1>
 
                     <p>
@@ -56,7 +56,62 @@ function Chat(){
                 </div>
             </header>
 
-            <form className="chat-form" onSubmit={submitQuestion}>
+            {error && (
+                <p className="state-message error-message">
+                    {error}
+                </p>
+            )}
+
+            <section className="chat-workspace">
+                {isLoading && (
+                    <p className="state-message">
+                        Searching documents and generating an answer...
+                    </p>
+                )}
+
+                {!isLoading && !answer && !error && (
+                    <div className="empty-state compact-empty-state">
+                        <h2>
+                            Ready to search your documents
+                        </h2>
+
+                        <p>
+                            Ask a specific question about an uploaded PDF to get a grounded answer with citations.
+                        </p>
+                    </div>
+                )}
+
+                {answer && (
+                    <section className="answer-panel">
+                        <span className="assistant-label">
+                            Answer
+                        </span>
+
+                        <p>
+                            {answer}
+                        </p>
+                    </section>
+                )}
+
+                {citations.length > 0 && (
+                    <section className="citations-section">
+                        <h2>
+                            Citations
+                        </h2>
+
+                        <div className="citation-grid">
+                            {citations.map((citation) => (
+                                <Citation
+                                    key={citation.chunk_id}
+                                    citation={citation}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                )}
+            </section>
+
+            <form className="chat-composer" onSubmit={submitQuestion}>
                 <label htmlFor="question">
                     Question
                 </label>
@@ -65,55 +120,20 @@ function Chat(){
                     id="question"
                     value={question}
                     onChange={(event) => setQuestion(event.target.value)}
-                    placeholder="Ask a question about your uploaded documents"
+                    placeholder="Ask about a policy, report, manual, or uploaded PDF..."
                     rows="4"
                 />
 
-                <button type="submit" disabled={isLoading || !question.trim()}>
-                    {isLoading ? "Asking..." : "Ask"}
-                </button>
+                <div className="composer-actions">
+                    <span>
+                        Uses top 3 retrieved chunks
+                    </span>
+
+                    <button type="submit" disabled={isLoading || !question.trim()}>
+                        {isLoading ? "Asking..." : "Ask"}
+                    </button>
+                </div>
             </form>
-
-            {isLoading && (
-                <p className="state-message">
-                    Searching documents and generating an answer...
-                </p>
-            )}
-
-            {error && (
-                <p className="state-message error-message">
-                    {error}
-                </p>
-            )}
-
-            {answer && (
-                <section className="answer-panel">
-                    <h2>
-                        Answer
-                    </h2>
-
-                    <p>
-                        {answer}
-                    </p>
-                </section>
-            )}
-
-            {citations.length > 0 && (
-                <section className="citations-section">
-                    <h2>
-                        Citations
-                    </h2>
-
-                    <div className="citation-grid">
-                        {citations.map((citation) => (
-                            <Citation
-                                key={citation.chunk_id}
-                                citation={citation}
-                            />
-                        ))}
-                    </div>
-                </section>
-            )}
         </div>
     )
 

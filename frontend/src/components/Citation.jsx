@@ -1,7 +1,7 @@
 function Citation({ citation }) {
     return (
         <article className="citation-card">
-            <div className="card-header">
+            <div className="citation-meta">
                 <h3>
                     {citation.filename}
                 </h3>
@@ -10,6 +10,10 @@ function Citation({ citation }) {
                     Page {citation.page_number ?? "N/A"}
                 </span>
             </div>
+
+            <span className="citation-label">
+                Retrieved text
+            </span>
 
             <p>
                 {citation.text}

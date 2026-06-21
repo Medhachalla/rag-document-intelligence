@@ -56,15 +56,15 @@ function Dashboard(){
     }, []);
 
     return (
-        <div>
+        <div className="page-stack">
             <header className="page-header">
                 <div>
                     <h1>
-                        Documents
+                        Document dashboard
                     </h1>
 
                     <p>
-                        Track uploaded PDFs and processing status.
+                        Monitor uploaded PDFs, ingestion status, and processing issues.
                     </p>
                 </div>
             </header>
@@ -94,39 +94,57 @@ function Dashboard(){
             )}
 
             {!isLoading && !error && documents.length > 0 && (
-                <div className="document-grid">
-                    {documents.map((document) => (
-                        <article className="document-card" key={document.id}>
-                            <div className="card-header">
-                                <h2>
-                                    {document.filename}
-                                </h2>
+                <section className="document-list" aria-label="Uploaded documents">
+                    <div className="document-list-header">
+                        <span>
+                            Document
+                        </span>
 
-                                <StatusBadge status={document.status} />
-                            </div>
+                        <span>
+                            Status
+                        </span>
 
-                            <p className="muted-text">
-                                Document ID: {document.id}
-                            </p>
+                        <span>
+                            Uploaded
+                        </span>
+                    </div>
 
-                            <p className="meta-row">
-                                Uploaded: {formatDate(document.uploaded_at)}
-                            </p>
-
-                            {document.status === "failed" && document.error_message && (
-                                <div className="error-panel">
-                                    <p className="panel-label">
-                                        Error:
-                                    </p>
+                    <div className="document-list-body">
+                        {documents.map((document) => (
+                            <article className="document-row" key={document.id}>
+                                <div className="document-main">
+                                    <h2>
+                                        {document.filename}
+                                    </h2>
 
                                     <p>
-                                        {document.error_message}
+                                        ID {document.id}
                                     </p>
                                 </div>
-                            )}
-                        </article>
-                    ))}
-                </div>
+
+                                <div className="document-status">
+                                    <StatusBadge status={document.status} />
+                                </div>
+
+                                <p className="document-date">
+                                    {formatDate(document.uploaded_at)}
+                                </p>
+
+                                {document.status === "failed" && document.error_message && (
+                                    <div className="error-panel document-error">
+                                        <p className="panel-label">
+                                            Processing error
+                                        </p>
+
+                                        <p>
+                                            {document.error_message}
+                                        </p>
+                                    </div>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                </section>
             )}
         </div>
     )
