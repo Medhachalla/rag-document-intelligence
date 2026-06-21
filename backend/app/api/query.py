@@ -15,6 +15,21 @@ router = APIRouter(
 )
 
 
+def _deduplicate_citations(citations: list[Citation]) -> list[Citation]:
+    unique: dict[tuple[str, int | None, str], Citation] = {}
+
+    for citation in citations:
+        key = (citation.filename, citation.page_number, citation.text)
+        existing = unique.get(key)
+        existing_score = existing.score if existing and existing.score is not None else -1
+        citation_score = citation.score if citation.score is not None else -1
+
+        if existing is None or citation_score > existing_score:
+            unique[key] = citation
+
+    return list(unique.values())
+
+
 @router.post(
     "/query",
     response_model=QueryResponse,
@@ -64,19 +79,11 @@ async def query_documents(payload: QueryRequest) -> QueryResponse:
 
     chunk_rows = get_chunks_by_ids([match["chunk_id"] for match in matches])
     citations: list[Citation] = []
-    context_chunks: list[str] = []
 
     for match in matches:
         row = chunk_rows.get(match["chunk_id"])
         if not row:
             continue
-        context_chunks.append(
-            format_source_context(
-                filename=row["filename"],
-                page_number=row["page_number"],
-                content=row["text"],
-            )
-        )
         citations.append(
             Citation(
                 document_id=row["document_id"],
@@ -87,6 +94,16 @@ async def query_documents(payload: QueryRequest) -> QueryResponse:
                 text=row["text"],
             )
         )
+
+    citations = _deduplicate_citations(citations)
+    context_chunks = [
+        format_source_context(
+            filename=citation.filename,
+            page_number=citation.page_number,
+            content=citation.text,
+        )
+        for citation in citations
+    ]
 
     try:
         answer = await generate_answer(payload.question, context_chunks)
