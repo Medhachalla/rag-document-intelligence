@@ -1,63 +1,102 @@
-import {useState} from "react";
+import { useState } from "react";
+
 import api from "../api/client";
+import getApiErrorMessage from "../api/errors";
 
 
 function Upload(){
+    const [file, setFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [error, setError] = useState("");
 
-const [file,setFile]=useState(null);
+    async function upload(event){
+        event.preventDefault();
 
+        if (!file) {
+            setError("Select a PDF before uploading");
+            return;
+        }
 
-async function upload(){
+        const formData = new FormData();
+        formData.append("file", file);
 
-const formData=new FormData();
+        try {
+            setIsUploading(true);
+            setError("");
+            setSuccessMessage("");
 
-formData.append(
-"file",
-file
-);
+            const response = await api.post(
+                "/api/v1/documents/upload",
+                formData
+            );
 
+            setSuccessMessage(`${response.data.filename} uploaded and processing has started.`);
+            setFile(null);
+            event.currentTarget.reset();
+        } catch (requestError) {
+            setError(getApiErrorMessage(requestError, "Upload failed"));
+        } finally {
+            setIsUploading(false);
+        }
+    }
 
-await api.post(
-"/api/v1/documents/upload",
-formData
-);
+    function handleFileChange(event) {
+        setFile(event.target.files[0] || null);
+        setSuccessMessage("");
+        setError("");
+    }
 
-alert("Uploaded");
+    return (
+        <div>
+            <header className="page-header">
+                <div>
+                    <h1>
+                        Upload Document
+                    </h1>
 
-}
+                    <p>
+                        Add PDFs to the searchable DocSense knowledge base.
+                    </p>
+                </div>
+            </header>
 
+            <form className="upload-panel" onSubmit={upload}>
+                <label htmlFor="document-upload">
+                    PDF file
+                </label>
 
-return (
+                <input
+                    id="document-upload"
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handleFileChange}
+                />
 
-<div>
+                {file && (
+                    <p className="selected-file">
+                        Selected: {file.name}
+                    </p>
+                )}
 
-<h1>
-Upload Document
-</h1>
+                <button type="submit" disabled={isUploading}>
+                    {isUploading ? "Uploading..." : "Upload PDF"}
+                </button>
+            </form>
 
+            {successMessage && (
+                <p className="state-message success-message">
+                    {successMessage}
+                </p>
+            )}
 
-<input
-
-type="file"
-
-accept=".pdf"
-
-onChange={
-(e)=>setFile(e.target.files[0])
-}
-
-/>
-
-
-<button onClick={upload}>
-Upload
-</button>
-
-
-</div>
-
-)
-
+            {error && (
+                <p className="state-message error-message">
+                    {error}
+                </p>
+            )}
+        </div>
+    )
 }
 
 

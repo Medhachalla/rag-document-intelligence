@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import api from "../api/client";
+import getApiErrorMessage from "../api/errors";
 import Citation from "../components/Citation";
 
 
@@ -28,14 +29,13 @@ function Chat(){
 
             const response = await api.post("/api/v1/query", {
                 question: trimmedQuestion,
+                top_k: 3,
             });
 
             setAnswer(response.data.answer);
             setCitations(response.data.citations || []);
         } catch (requestError) {
-            const message = requestError.response?.data?.message || "Failed to get an answer";
-
-            setError(message);
+            setError(getApiErrorMessage(requestError, "Failed to get an answer"));
             setCitations(requestError.response?.data?.citations || []);
         } finally {
             setIsLoading(false);
@@ -44,11 +44,19 @@ function Chat(){
 
     return (
         <div>
-            <h1>
-                Chat
-            </h1>
+            <header className="page-header">
+                <div>
+                    <h1>
+                        Chat
+                    </h1>
 
-            <form onSubmit={submitQuestion}>
+                    <p>
+                        Ask questions and get grounded answers from uploaded PDFs.
+                    </p>
+                </div>
+            </header>
+
+            <form className="chat-form" onSubmit={submitQuestion}>
                 <label htmlFor="question">
                     Question
                 </label>
@@ -61,19 +69,25 @@ function Chat(){
                     rows="4"
                 />
 
-                <button type="submit" disabled={isLoading}>
+                <button type="submit" disabled={isLoading || !question.trim()}>
                     {isLoading ? "Asking..." : "Ask"}
                 </button>
             </form>
 
+            {isLoading && (
+                <p className="state-message">
+                    Searching documents and generating an answer...
+                </p>
+            )}
+
             {error && (
-                <p>
+                <p className="state-message error-message">
                     {error}
                 </p>
             )}
 
             {answer && (
-                <section>
+                <section className="answer-panel">
                     <h2>
                         Answer
                     </h2>
@@ -85,17 +99,19 @@ function Chat(){
             )}
 
             {citations.length > 0 && (
-                <section>
+                <section className="citations-section">
                     <h2>
                         Citations
                     </h2>
 
-                    {citations.map((citation) => (
-                        <Citation
-                            key={citation.chunk_id}
-                            citation={citation}
-                        />
-                    ))}
+                    <div className="citation-grid">
+                        {citations.map((citation) => (
+                            <Citation
+                                key={citation.chunk_id}
+                                citation={citation}
+                            />
+                        ))}
+                    </div>
                 </section>
             )}
         </div>

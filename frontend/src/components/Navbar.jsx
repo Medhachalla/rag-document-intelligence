@@ -3,19 +3,25 @@ import { NavLink } from "react-router-dom";
 
 function Navbar() {
     return (
-        <nav>
-            <NavLink to="/">
-                Dashboard
+        <header className="navbar">
+            <NavLink className="brand" to="/">
+                DocSense AI
             </NavLink>
 
-            <NavLink to="/upload">
-                Upload
-            </NavLink>
+            <nav className="nav-links">
+                <NavLink to="/">
+                    Dashboard
+                </NavLink>
 
-            <NavLink to="/chat">
-                Chat
-            </NavLink>
-        </nav>
+                <NavLink to="/upload">
+                    Upload
+                </NavLink>
+
+                <NavLink to="/chat">
+                    Chat
+                </NavLink>
+            </nav>
+        </header>
     );
 }
 

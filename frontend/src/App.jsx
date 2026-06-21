@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
+import Layout from "./components/Layout";
 import Upload from "./pages/Upload";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
@@ -11,7 +11,7 @@ function App(){
 return (
 <BrowserRouter>
 
-<Navbar/>
+<Layout>
 
 <Routes>
 
@@ -24,6 +24,8 @@ return (
 <Route path="/chat" element={<Chat/>}/>
 
 </Routes>
+
+</Layout>
 
 </BrowserRouter>
 )

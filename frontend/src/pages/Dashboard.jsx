@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import api from "../api/client";
+import getApiErrorMessage from "../api/errors";
+import StatusBadge from "../components/StatusBadge";
 
 
 function formatDate(value) {
@@ -14,15 +16,6 @@ function formatDate(value) {
     }
 
     return date.toLocaleString();
-}
-
-
-function formatStatus(status) {
-    if (status === "ready") {
-        return "completed";
-    }
-
-    return status || "unknown";
 }
 
 
@@ -44,9 +37,9 @@ function Dashboard(){
                 if (isMounted) {
                     setDocuments(response.data);
                 }
-            } catch {
+            } catch (requestError) {
                 if (isMounted) {
-                    setError("Failed to load documents");
+                    setError(getApiErrorMessage(requestError, "Failed to load documents"));
                 }
             } finally {
                 if (isMounted) {
@@ -64,51 +57,65 @@ function Dashboard(){
 
     return (
         <div>
-            <h1>
-                Documents
-            </h1>
+            <header className="page-header">
+                <div>
+                    <h1>
+                        Documents
+                    </h1>
+
+                    <p>
+                        Track uploaded PDFs and processing status.
+                    </p>
+                </div>
+            </header>
 
             {isLoading && (
-                <p>
+                <p className="state-message">
                     Loading documents...
                 </p>
             )}
 
             {!isLoading && error && (
-                <p>
+                <p className="state-message error-message">
                     {error}
                 </p>
             )}
 
             {!isLoading && !error && documents.length === 0 && (
-                <p>
-                    No documents uploaded yet
-                </p>
+                <section className="empty-state">
+                    <h2>
+                        No documents uploaded yet
+                    </h2>
+
+                    <p>
+                        Upload a PDF to start building your document knowledge base.
+                    </p>
+                </section>
             )}
 
             {!isLoading && !error && documents.length > 0 && (
-                <div>
+                <div className="document-grid">
                     {documents.map((document) => (
-                        <article key={document.id}>
-                            <h2>
-                                {document.filename}
-                            </h2>
+                        <article className="document-card" key={document.id}>
+                            <div className="card-header">
+                                <h2>
+                                    {document.filename}
+                                </h2>
 
-                            <p>
+                                <StatusBadge status={document.status} />
+                            </div>
+
+                            <p className="muted-text">
                                 Document ID: {document.id}
                             </p>
 
-                            <p>
-                                Status: {formatStatus(document.status)}
-                            </p>
-
-                            <p>
+                            <p className="meta-row">
                                 Uploaded: {formatDate(document.uploaded_at)}
                             </p>
 
                             {document.status === "failed" && document.error_message && (
-                                <div>
-                                    <p>
+                                <div className="error-panel">
+                                    <p className="panel-label">
                                         Error:
                                     </p>
 
