@@ -1,10 +1,45 @@
 # DocSense AI
 
-A production-style Retrieval Augmented Generation (RAG) document intelligence system that allows users to upload PDF documents, perform semantic search over their contents, and generate AI-powered answers with source citations.
+A production-style Retrieval Augmented Generation (RAG) document intelligence platform that allows users to upload PDF documents, perform semantic search over their contents, and generate AI-powered answers grounded with source citations.
 
-The system combines modern search infrastructure with local AI inference by using vector embeddings, ChromaDB retrieval, and Ollama-powered LLM generation.
+The system combines modern AI application architecture with production backend engineering practices:
 
-The goal of this project is to explore how production RAG systems are designed: document ingestion pipelines, vector databases, retrieval strategies, API architecture, and reliable AI application engineering.
+* Document ingestion pipelines
+* Vector similarity search
+* Local LLM inference
+* REST API architecture
+* React frontend
+* Containerized deployment
+* Service-to-service communication
+
+The goal of this project is to explore how real-world AI-powered document systems are designed, including ingestion workflows, retrieval systems, API architecture, frontend integration, and reliable deployment patterns.
+
+---
+
+# Why I Built This
+
+Modern teams store large amounts of information inside documents such as technical documentation, research papers, internal guides, and product manuals.
+
+Traditional document search relies heavily on keyword matching, which makes it difficult to find relevant information when users do not know the exact wording used inside a document.
+
+I built DocSense AI to explore how modern AI-powered knowledge systems solve this problem using Retrieval Augmented Generation (RAG).
+
+The project focuses on building a complete document intelligence workflow:
+
+* Ingesting unstructured documents
+* Converting text into semantic vector representations
+* Performing similarity-based retrieval
+* Generating grounded AI responses
+* Providing citations so users can verify answers
+
+Beyond the AI component, this project explores production application engineering:
+
+* Designing maintainable backend APIs
+* Separating business logic into services
+* Building a complete React application
+* Running AI models locally
+* Containerizing services using Docker
+* Creating reproducible environments
 
 ---
 
@@ -12,60 +47,17 @@ The goal of this project is to explore how production RAG systems are designed: 
 
 ## Document Intelligence Pipeline
 
-- Upload PDF documents through an API
-- Extract text from documents
-- Split documents into optimized chunks
-- Generate semantic embeddings
-- Store vectors for similarity search
-- Retrieve relevant context for user queries
+* Upload PDF documents through a web interface or API
+* Extract text from documents
+* Split documents into optimized chunks
+* Generate semantic embeddings
+* Store vectors for similarity search
+* Retrieve relevant document context
+* Track document processing status
 
-## AI Question Answering
-
-- Ask natural language questions about uploaded documents
-- Retrieve the most relevant document sections
-- Generate answers using a local LLM
-- Return citations with:
-  - document name
-  - page number
-  - retrieved text
-
-## Backend Engineering
-
-- FastAPI REST architecture
-- Service-layer separation
-- SQLite metadata storage
-- ChromaDB vector storage
-- Background document processing
-- Structured API error handling
-- Configurable pipeline parameters
-- Automated testing
-
----
-
-# System Architecture
+Pipeline:
 
 ```
-                    User
-                      |
-                      v
-              React Frontend
-                      |
-                      v
-              FastAPI Backend
-                      |
-        --------------------------------
-        |              |               |
-        v              v               v
-
-    SQLite        ChromaDB          Ollama
-  Metadata        Vectors            LLM
-        |
-        |
-        v
-
-Document Processing Pipeline
-
-
 PDF Upload
 
      |
@@ -97,11 +89,70 @@ Semantic Retrieval
      v
 
 LLM Answer Generation
+```
 
-     |
-     v
+---
 
-Response + Citations
+## AI Question Answering
+
+Users can ask natural language questions about uploaded documents.
+
+The system:
+
+1. Converts the question into an embedding
+2. Performs similarity search
+3. Retrieves relevant document chunks
+4. Sends retrieved context to the LLM
+5. Generates an answer with citations
+
+Responses include:
+
+* Document name
+* Page number
+* Retrieved text
+* Similarity score
+
+---
+
+# System Architecture
+
+```
+                         User
+
+                          |
+
+                          v
+
+                  React Frontend
+
+                          |
+
+                          v
+
+                    Nginx Proxy
+
+                          |
+
+                          v
+
+                  FastAPI Backend
+
+        ----------------------------------
+
+        |                |                |
+
+        v                v                v
+
+     SQLite          ChromaDB          Ollama
+
+   Metadata          Vectors            LLM
+
+
+                          |
+
+                          v
+
+              Document Processing Pipeline
 ```
 
 ---
@@ -110,31 +161,100 @@ Response + Citations
 
 ## Frontend
 
-- React
-- JavaScript
-- REST API integration
+* React
+* JavaScript
+* Axios
+* REST API integration
+* Component-based UI
+* Vite production build
+* Nginx static serving
 
 ## Backend
 
-- Python
-- FastAPI
-- Pydantic
-- SQLite
+* Python
+* FastAPI
+* Pydantic
+* SQLite
+* Service-layer architecture
 
 ## AI / Search
 
-- Sentence Transformers embeddings
-- ChromaDB vector database
-- Ollama local LLM inference
+* Sentence Transformers embeddings
+* ChromaDB vector database
+* Ollama local LLM inference
+
+## Infrastructure
+
+* Docker
+* Docker Compose
+* Nginx reverse proxy
 
 ## Testing
 
-- Pytest
-- Mocked AI/vector dependencies for deterministic tests
+* Pytest
+* Mocked AI/vector dependencies
 
 ---
 
-# How RAG Works In This Project
+# Frontend Application
+
+The frontend provides a complete user interface for interacting with the RAG system.
+
+## Dashboard
+
+Users can:
+
+* View uploaded documents
+* Monitor processing status
+* See ingestion failures
+* Track document availability
+
+---
+
+## Document Upload
+
+The upload interface supports:
+
+* PDF selection
+* Upload validation
+* Document ingestion workflow
+* Processing status updates
+
+---
+
+## AI Chat Interface
+
+Users can query documents through a conversational interface.
+
+Workflow:
+
+```
+User Question
+
+      |
+
+React Request
+
+      |
+
+FastAPI Retrieval Pipeline
+
+      |
+
+Relevant Chunks
+
+      |
+
+LLM Generation
+
+      |
+
+Answer + Citations
+```
+
+---
+
+# How RAG Works
 
 Traditional search matches keywords.
 
@@ -142,23 +262,19 @@ RAG performs semantic search.
 
 Example:
 
-A user asks:
-
 ```
 "What are actuators used for?"
 ```
 
-The system does not search for the exact words.
+The system:
 
-Instead:
+1. Converts the question into a vector
+2. Compares it against document embeddings
+3. Retrieves the closest document chunks
+4. Provides those chunks as context to the LLM
+5. Generates a grounded response
 
-1. The question is converted into an embedding vector.
-2. ChromaDB compares this vector against document chunk embeddings.
-3. The most relevant chunks are retrieved.
-4. The retrieved context is passed to the LLM.
-5. The LLM generates an answer grounded in the retrieved documents.
-
-This reduces hallucination because the model answers using retrieved document evidence.
+This reduces hallucination by ensuring answers are based on retrieved document evidence.
 
 ---
 
@@ -169,28 +285,20 @@ docsense-ai/
 
 ├── frontend/
 │
-│   └── React application
+│   ├── src/
+│   ├── Dockerfile
+│   └── nginx.conf
 │
 ├── backend/
 │
 │   ├── app/
-│   │
 │   ├── api/
-│   │   └── REST endpoints
-│   │
 │   ├── services/
-│   │   ├── document ingestion
-│   │   ├── PDF extraction
-│   │   ├── embeddings
-│   │   ├── vector search
-│   │   └── LLM generation
-│   │
 │   ├── core/
-│   │   └── configuration and logging
-│   │
-│   └── tests/
+│   ├── tests/
+│   └── Dockerfile
 │
-└── README.md
+└── docker-compose.yml
 ```
 
 ---
@@ -201,44 +309,25 @@ docsense-ai/
 
 Install:
 
-- Python 3.11+
-- Node.js
-- Ollama
+* Docker
+* Docker Compose
+* Ollama
 
-
----
-
-# Backend Setup
-
-Navigate to backend:
+Verify:
 
 ```bash
-cd backend
-```
+docker --version
 
-Create virtual environment:
+docker compose version
 
-```bash
-python3 -m venv .venv
-```
-
-Activate:
-
-Linux/macOS:
-
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
+ollama --version
 ```
 
 ---
 
-## Environment Configuration
+# Environment Configuration
+
+## Backend Environment
 
 Create:
 
@@ -249,7 +338,7 @@ backend/.env
 Example:
 
 ```env
-DOCSENSE_OLLAMA_BASE_URL=http://localhost:11434
+DOCSENSE_OLLAMA_BASE_URL=http://host.docker.internal:11434
 DOCSENSE_OLLAMA_MODEL=llama3.2:3b
 DOCSENSE_OLLAMA_TIMEOUT_SECONDS=120
 
@@ -259,75 +348,88 @@ DOCSENSE_MIN_CHUNK_CHARS=80
 DOCSENSE_MIN_RETRIEVAL_SCORE=0.2
 ```
 
-These variables control:
+These variables configure:
 
-### Ollama Configuration
-
-`OLLAMA_BASE_URL`
-
-Location of local LLM server.
-
-`OLLAMA_MODEL`
-
-Model used for answer generation.
-
-`OLLAMA_TIMEOUT_SECONDS`
-
-Maximum generation wait time.
+* Local LLM connection
+* Retrieval parameters
+* Document processing behavior
 
 ---
 
-### RAG Configuration
+## Frontend Environment
 
-`CHUNK_SIZE`
+Create:
 
-Maximum size of document chunks.
+```
+frontend/.env
+```
 
-`CHUNK_OVERLAP`
+Example:
 
-Overlap between chunks to preserve context.
+```env
+VITE_API_URL=/api
+```
 
-`MIN_CHUNK_CHARS`
+The frontend communicates with the backend through Nginx reverse proxy routing.
 
-Removes very small useless chunks such as isolated headings.
+Requests:
 
-`MIN_RETRIEVAL_SCORE`
+```
+Browser
 
-Filters low-quality similarity matches.
+/api/v1/documents
+
+        |
+
+        v
+
+Nginx
+
+        |
+
+        v
+
+FastAPI Backend
+```
+
+This avoids hardcoding backend container addresses inside the frontend.
 
 ---
 
-## Start Ollama
+# Running the Application
 
-Pull model:
-
-```bash
-ollama pull llama3.2:3b
-```
-
-Start server:
+Build and start all services:
 
 ```bash
-ollama serve
+docker compose up --build
 ```
 
----
+Docker will:
 
-## Run Backend
+1. Build the React frontend
+2. Build the FastAPI backend
+3. Install required dependencies
+4. Start Nginx
+5. Start the backend API
+6. Connect services through Docker networking
 
-From backend:
+Application:
 
-```bash
-uvicorn app.main:app --reload
+Frontend:
+
+```
+http://localhost:5173
 ```
 
-Backend runs at:
+Backend:
 
 ```
 http://localhost:8000
 ```
 
-API documentation:
+API Documentation:
+
+FastAPI provides interactive documentation:
 
 ```
 http://localhost:8000/docs
@@ -335,180 +437,70 @@ http://localhost:8000/docs
 
 ---
 
-# Frontend Setup
+# Running Ollama
 
-Navigate:
+Pull the model:
 
 ```bash
-cd frontend
+ollama pull llama3.2:3b
 ```
 
-Install dependencies:
+Start Ollama:
 
 ```bash
-npm install
+ollama serve
+```
+
+The backend container communicates with Ollama through:
+
+```
+host.docker.internal:11434
+```
+
+---
+
+# Optional Local Development Setup
+
+For frontend/backend development without Docker:
+
+## Backend
+
+```bash
+cd backend
+
+python3 -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
 Run:
 
 ```bash
+uvicorn app.main:app --reload
+```
+
+---
+
+## Frontend
+
+```bash
+cd frontend
+
+npm install
+
 npm run dev
 ```
 
----
-
-# API Examples
-
-## Upload Document
-
-Endpoint:
-
-```
-POST /api/v1/documents/upload
-```
-
-Purpose:
-
-Uploads a PDF and starts document ingestion.
-
-Flow:
-
-```
-PDF Upload
-      |
-      v
-Validation
-      |
-      v
-Background Processing
-      |
-      v
-Text Extraction
-      |
-      v
-Embedding Generation
-      |
-      v
-Vector Storage
-```
-
-Example:
-
-```bash
-curl -X POST \
-http://localhost:8000/api/v1/documents/upload \
--F "file=@example.pdf"
-```
-
-Response:
-
-```json
-{
-  "document_id": "1234",
-  "filename": "example.pdf",
-  "status": "processing"
-}
-```
+This workflow is only for active development. The recommended way to run the complete application is Docker Compose.
 
 ---
 
-# Query Documents
-
-Endpoint:
-
-```
-POST /api/v1/query
-```
-
-Purpose:
-
-Performs semantic search and generates an answer using retrieved document context.
-
-Request:
-
-```json
-{
-  "question": "What are actuators used for?",
-  "top_k": 3
-}
-```
-
-Processing:
-
-```
-Question
-
-   |
-   v
-
-Embedding Generation
-
-   |
-   v
-
-Vector Similarity Search
-
-   |
-   v
-
-Retrieve Relevant Chunks
-
-   |
-   v
-
-LLM Generation
-
-   |
-   v
-
-Answer + Citations
-```
-
-Response:
-
-```json
-{
-  "answer": "Actuators convert energy into motion...",
-  "citations": [
-    {
-      "filename": "Actuators.pdf",
-      "page_number": 1,
-      "score": 0.85,
-      "text": "An actuator is..."
-    }
-  ]
-}
-```
-
-The citation metadata allows users to verify that answers are grounded in the original document.
-
----
-
-# Error Handling
-
-All API errors follow a consistent format:
-
-```json
-{
-  "error": "ERROR_CODE",
-  "message": "Human readable explanation"
-}
-```
-
-Example:
-
-```json
-{
-  "error": "OLLAMA_UNAVAILABLE",
-  "message": "Unable to generate answer. Start Ollama service."
-}
-```
-
----
 
 # Testing
 
-Run backend tests:
+Run:
 
 ```bash
 cd backend
@@ -518,13 +510,10 @@ pytest -v
 
 Tests cover:
 
-- document chunking
-- ingestion pipeline
-- vector retrieval
-- API behavior
-- error handling
-
-External services such as Ollama and Chroma are isolated/mocked during tests.
+* Chunking
+* Retrieval
+* API behavior
+* Error handling
 
 ---
 
@@ -532,38 +521,57 @@ External services such as Ollama and Chroma are isolated/mocked during tests.
 
 ## Why ChromaDB?
 
-A vector database enables semantic retrieval rather than keyword matching.
+Enables semantic search instead of keyword matching.
 
-## Why local Ollama?
+## Why Ollama?
 
-Allows private AI inference without external API costs.
+Provides local AI inference without external API costs.
 
-## Why separate SQLite and Chroma?
+## Why Docker?
 
-SQLite stores application metadata.
+Provides:
 
-Chroma stores high-dimensional vector representations.
+* Reproducible environments
+* Consistent setup
+* Production-style deployment
 
-Keeping responsibilities separate improves maintainability.
+## Why Separate SQLite and ChromaDB?
 
-## Why service-layer architecture?
+SQLite:
 
-The backend separates:
+* Application metadata
 
-- API handling
-- business logic
-- data access
-- AI components
+ChromaDB:
 
-making the system easier to test and extend.
+* Vector embeddings
+
+---
+
+# Screenshots / Demo
+
+Screenshots will be added here.
+
+## Dashboard
+
+![Dashboard](image.png)
+
+## Document Upload
+
+*![Document upload screen](image-1.png)
+
+## AI Chat
+
+![Chat](image-2.png)
 
 ---
 
 # Future Improvements
 
-- Hybrid keyword + semantic search
-- Reranking models
-- Multi-document conversations
-- Streaming LLM responses
-- Cloud deployment
-- Authentication and user document isolation
+* Hybrid keyword + semantic search
+* Reranking models
+* Streaming responses
+* Authentication
+* Multi-user document isolation
+* Cloud deployment
+* Monitoring
+* Kubernetes deployment
